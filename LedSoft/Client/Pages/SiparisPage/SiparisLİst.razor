@@ -1,0 +1,131 @@
+﻿@page "/siparislist"
+@using Blazored.LocalStorage
+@using LedSoft.Application.CustomExceptions
+@using LedSoft.Application.DTOs
+@using LedSoft.Application.DTOs.Other
+@using LedSoft.Application.Json
+@using LedSoft.Client.Utils
+@using Newtonsoft.Json
+@using Radzen
+@using Radzen.Blazor
+@using LedSoft.Client.CustomComponents.Grid
+
+<RadzenButton Shade="Shade.Dark" Click=goCreateUserPage Icon="add" Variant="Variant.Flat" Text="Yeni Siparis Ekle" ButtonStyle="ButtonStyle.Success" />
+<Grid Columns="Columns" Data="SiparisLists" UIWithT="RenderColumn" UIWithT2="RenderColumn" TItem="SipariDTO" OnDeleteAction="DeleteUser" OnEditAction="goUpdateUserPage" />
+
+
+
+@code {
+    [Inject]
+    public HttpClient Client { get; set; }
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+    [Inject]
+    NotificationService NotificationService { get; set; }
+
+    public List<ColumnConfig> columnConfigs;
+    List<RadzenDataGridColumn<SipariDTO>> Columns = new List<RadzenDataGridColumn<SipariDTO>>();
+    DynamicGrid<SipariDTO> gridList = new DynamicGrid<SipariDTO>();
+    protected IEnumerable<SipariDTO> SiparisLists;
+    private RenderFragment<RadzenDataGridColumn<SipariDTO>> RenderColumn = (column) =>@<RadzenDataGridColumn TItem="SipariDTO" Property="@(column.Property)" Title="@(column.Title)">
+
+    </RadzenDataGridColumn>
+    ;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadList();
+    }
+    protected async void goCreateUserPage()
+    {
+
+        NavigationManager.NavigateTo("/siparises/add");
+    }
+
+    protected void goUpdateUserPage(Guid UserId)
+    {
+        NavigationManager.NavigateTo("/siparises/edit/" + UserId);
+    }
+    protected  void DeleteUser(Guid Id)
+    {
+        // bool confirmed = await ModalManager.ConfirmationAsync("Confirmation", "Ürünü Silmek İstediğinize eminmisiniz ?");
+
+        // if (!confirmed) return;
+
+        // try
+        // {
+        //     string token = await localStorageService.GetItemAsStringAsync("token");
+        //     bool deleted = await Client.PostGetServiceResponseAsync<bool, Guid>("api/customer/Delete", Id, token, true);
+
+        //     await LoadList();
+        // }
+        // catch (ApiException ex)
+        // {
+        //     await ModalManager.ShowMessageAsync("Customer Deletion Error", ex.Message);
+        // }
+        // catch (Exception ex)
+        // {
+        //     await ModalManager.ShowMessageAsync("An Error", ex.Message);
+        // }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    protected async Task LoadList()
+    {
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            SiparisLists = await Client.GetServiceResponseAsync<List<SipariDTO>>("api/Customer/Customers", token, true);
+            columnConfigs = JsonConvert.DeserializeObject<List<ColumnConfig>>(SiparisJson.json);
+            gridList.GenerateColumnsFromType(null, columnConfigs);
+
+            foreach (var item in gridList.Columns)
+            {
+                Columns.Add(item);
+            }
+        }
+        catch (ApiException ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Duration = 40000,
+                    Summary="Hata Message",
+                    Detail=ex.Message
+                    
+                });
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Duration = 40000,
+                    Summary = "Hata Message",
+                    Detail = ex.Message
+
+                });
+        }
+
+    }
+
+
+}

@@ -1,0 +1,126 @@
+﻿@page "/siparises/add"
+@page "/siparises/edit/{SiparisId:guid}"
+@using Blazored.LocalStorage
+@using LedSoft.Application.CustomExceptions
+@using LedSoft.Application.DTOs
+@using LedSoft.Client.Utils
+
+
+<h3>
+  siparises
+</h3>
+@* <EditForm Model="@siparisModel" OnValidSubmit="SubmitForm">
+
+</EditForm>
+ *@
+    
+@code {
+    // [Parameter]
+    // public Guid SiparisId { get; set; }
+    // [Inject]
+    // public HttpClient HttpClient { get; set; }
+    // [Inject]
+    // public NavigationManager NavigationManager { get; set; }
+    // [Inject]
+    // ILocalStorageService localStorageService { get; set; }
+    // private SipariDTO siparisModel = new SipariDTO();
+    // private List<SipariDTO> siparisGrups = new List<SipariDTO>();
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     try
+    //     {
+    //         string token = await localStorageService.GetItemAsStringAsync("token");
+    //         siparisGrups = await HttpClient.GetServiceResponseAsync<List<SipariDTO>>("api/SiparisGrup/siparisGrups/", token, true);
+    //         if (SiparisId != null && SiparisId != Guid.Empty)
+    //         {
+
+
+
+    //             siparisModel = await HttpClient.GetServiceResponseAsync<SipariDTO>("api/Siparis/siparisById/" + SiparisId, token, true);
+
+    //         }
+    //     }
+    //     catch (ApiException ex)
+    //     {
+    //         await ModalManager.ShowMessageAsync("Api Exception", ex.Message);
+    //     }
+    //     catch (Exception ex)
+    //     {
+
+    //         await ModalManager.ShowMessageAsync("Exception", ex.Message);
+    //     }
+
+    // }
+
+
+
+
+
+
+
+    // async Task SubmitForm(EditContext editContext)
+    // {
+    //     if (editContext.Validate())
+    //     {
+    //         await editOrUpdate((SipariDTO)editContext.Model);
+    //     }
+    // }
+
+    // async Task editOrUpdate(SipariDTO SipariDTO)
+    // {
+
+    //     try
+    //     {
+
+    //         String url = "api/siparis/create";
+    //         siparisModel = SipariDTO;
+    //         string token = await localStorageService.GetItemAsStringAsync("token");
+    //         // Update
+    //         if (SiparisId != null && SiparisId != Guid.Empty)
+    //         {
+    //             url = "api/siparis/update";
+    //             // siparisModel.UpdatedDate = DateTime.Now;
+    //             // siparisModel.UpdatedUser = await localStorageService.GetItemAsStringAsync("email");
+    //             siparisModel = await HttpClient.PostGetServiceResponseAsync<SipariDTO, SipariDTO>(url, siparisModel, token, true);
+    //         }
+    //         else
+    //         {
+    //             // siparisModel.CreateDate = DateTime.Now;
+    //             // siparisModel.CreatedUser = await localStorageService.GetItemAsStringAsync("email");
+    //             siparisModel = await HttpClient.PostGetServiceResponseAsync<SipariDTO, SipariDTO>(url, siparisModel, token, true);
+    //             // SiparisId = siparisModel.Id;
+    //             NavigationManager.NavigateTo("/siparislist");
+
+
+    //         }
+
+
+
+
+
+
+    //     }catch(ApiException ex)
+    //     {
+            
+           
+    //     }
+
+    // }
+    // private object OnTransformModel(object model)
+    // {
+    //     // Confirm that the model is of the expected type
+    //     // Do transformations here
+    //     // return the transformed model
+    //     return model;
+    // }
+    // void goBackproductList()
+    // {
+    //     NavigationManager.NavigateTo("/siparislist");
+    // }
+}
+
+
+
+
+
+

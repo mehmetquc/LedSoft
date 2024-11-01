@@ -1,0 +1,242 @@
+﻿@page "/stoks/add"
+@page "/stoks/edit/{StokId:long}"
+@using LedSoft.Application.CustomExceptions
+@using LedSoft.Application.DTOs
+@using LedSoft.Application.DTOs.Other
+@using LedSoft.Application.Json
+@using LedSoft.Application.Validators
+@using LedSoft.mobile.Components.Grid
+@using LedSoft.mobile.Utils
+@using Morris.Blazor.FluentValidation
+@using Morris.Blazor.Validation
+@using Newtonsoft.Json
+@inject DialogService dialogService
+@inject NotificationService NotificationService
+<RadzenTabs @bind-SelectedIndex=@selectedIndex TabPosition="TabPosition.Left">
+    <Tabs>
+        <RadzenTabsItem Text="Stok">
+            <EditForm Model="@stokTanimModel" OnValidSubmit="SubmitForm">
+                <Morris.Blazor.Validation.Validate ValidationProperties=@(ValidationProperties.Set.FluentValidator<StokTanimValidator>()) OnTransformModel=OnTransformModel />
+
+                <RadzenRow Gap="1rem">
+                    <RadzenColumn xs="12" sm="6" md="4" lg="3">
+                        <RadzenStack>
+                            <RadzenFormField AllowFloatingLabel="false" >
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="stokTanimModel.Kod" Placeholder="Stok Kodu" Name="Kod" />
+                                </ChildContent>
+                            </RadzenFormField>
+                            <ValidationMessage style="font-size:x-small" For="@(() => stokTanimModel.Kod)" />
+                            <RadzenFormField AllowFloatingLabel="false" >
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="stokTanimModel.Isim" Placeholder="Ürün Adı" Name="Isim" />
+                                </ChildContent>
+
+                            </RadzenFormField>
+                            <ValidationMessage style="font-size:x-small" For="@(() => stokTanimModel.Isim)" />
+
+                            <RadzenFormField AllowFloatingLabel="false">
+                                <ChildContent>
+                                    <RadzenNumeric @bind-Value="stokTanimModel.Kdvyuzde" Placeholder="Kdv(%)" Name="Kdvyuzde" />
+
+                                </ChildContent>
+
+                            </RadzenFormField>
+                            <ValidationMessage style="font-size:x-small" For="@(() => stokTanimModel.Kdvyuzde)" />
+                            <RadzenFormField AllowFloatingLabel="false">
+                                <ChildContent>
+                                    <RadzenDropDown @bind-Value="stokTanimModel.Birimid" AllowClear="true" Placeholder="Birim Seçiniz" Data="@birims" Style="width: 70%;" TextProperty="Isim" ValueProperty="Id" Name="Isim"></RadzenDropDown>
+
+                                </ChildContent>
+
+                            </RadzenFormField>
+                            <ValidationMessage style="font-size:x-small" For="@(() => stokTanimModel.Birimid)" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" Class="rz-mt-8 rz-mb-4">
+                    <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Kaydet" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Geri Dön" Click="@goBackproductList" />
+                </RadzenStack>
+            </EditForm>
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Barkod" Disabled="disabled">
+            <RadzenButton Shade="Shade.Dark" Click=goCreateBarkodPage Icon="add" Variant="Variant.Flat" Text="Yeni Barkod Ekle" ButtonStyle="ButtonStyle.Success" />
+            <RadzenDataList AllowVirtualization="false" Style="overflow:auto;"
+                            WrapItems="true" AllowPaging="true"
+                            Data="@stoktanimBarkods" TItem="StoktanimBarkodDTO" IsLoading=@isLoading PageSize="5" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
+                <Template Context="st">
+                    <RadzenCard Variant="Variant.Filled" class="rz-p-0" Style="width: 100%; overflow: hidden; border-style:groove; border-color:hotpink; border-width:2px">
+                        <RadzenRow Gap="0">
+                            <RadzenColumn Size="12" SizeLG="3" class="rz-p-4 product-title">
+                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-on-secondary-lighter">@(st.Barkod)</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeLG="7" class="rz-p-4">
+                                <RadzenRow Gap="0">
+                                    <RadzenColumn Size="12" SizeMD="6" SizeLG="2">
+                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-mb-0">Stok kodu</RadzenText>
+                                        <RadzenText TextStyle="TextStyle.Body2">@(st.BirimName)</RadzenText>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="12" SizeMD="6" SizeLG="2">
+                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-mb-0">Birim</RadzenText>
+                                        <RadzenText TextStyle="TextStyle.Body2">@(st.Carpan)</RadzenText>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeLG="2" class="rz-p-4">
+                                <RadzenButton Icon="edit" Click="@(()=> goUpdateBarkodPage(st.Id))" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" />
+                                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1">
+                                </RadzenButton>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+                </Template>
+            </RadzenDataList>
+
+
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Fiyat" Disabled="disabled">
+            Order Details
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+<style>
+    .product-title {
+        min-height: 72px;
+        background-color: var(--rz-secondary-lighter);
+    }
+
+    .price-badge {
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 20px;
+        padding: 8px;
+    }
+</style>
+@code {
+    int selectedIndex = 0;
+    [Parameter]
+    public long StokId { get; set; }
+
+    [Inject]
+    public HttpClient HttpClient { get; set; }
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+    [Inject]
+    ILocalStorageService localStorageService { get; set; }
+    bool disabled = true;
+    bool isLoading;
+    private StokTanimDTO stokTanimModel = new StokTanimDTO();
+    private List<StokTanimBirimDTO> birims = new List<StokTanimBirimDTO>();
+    private List<StoktanimBarkodDTO> stoktanimBarkods = new List<StoktanimBarkodDTO>();
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            HttpClientHandler handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => { return true; };
+
+            HttpClient = new HttpClient(handler);
+            birims = await HttpClient.GetServiceResponseAsync<List<StokTanimBirimDTO>>($"{ConnectionManager.apiConnection}api/stok/GetStokTanimBirims", token, true);
+            if (StokId!=null && StokId>0)
+            {
+                stokTanimModel = await HttpClient.GetServiceResponseAsync<StokTanimDTO>($"{ConnectionManager.apiConnection}api/stok/GetStokTanimById?StokId=" + StokId, token, true);
+                disabled = false;
+                if (!disabled)
+                {
+                    isLoading = true;
+                    stoktanimBarkods = await HttpClient.GetServiceResponseAsync<List<StoktanimBarkodDTO>>($"{ConnectionManager.apiConnection}api/Barkod/GetStokBarkodsById?StokId=" + StokId, token, true);
+                    isLoading = false;
+            
+                }
+            }
+        }
+        catch(ApiException ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Api Hata", Detail = ex.Message, Duration = 4000 });
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Front Hata", Detail = ex.Message, Duration = 4000 });
+        }
+
+    }
+    async Task SubmitForm(EditContext editContext)
+    {
+        if (editContext.Validate())
+        {
+            await editOrUpdate((StokTanimDTO)editContext.Model);
+        }
+    }
+    async Task editOrUpdate(StokTanimDTO StokTanimDTO)
+    {
+
+        try
+        {
+
+            String url = "api/stok/create";
+            stokTanimModel = StokTanimDTO;
+            string token = await localStorageService.GetItemAsStringAsync("token");
+            HttpClientHandler handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => { return true; };
+
+            HttpClient = new HttpClient(handler);
+            // Update
+            if (StokId != null && StokId > 0)
+            {
+                url = "api/stok/update";
+                stokTanimModel = await HttpClient.PostGetServiceResponseAsync<StokTanimDTO, StokTanimDTO>(ConnectionManager.apiConnection+url, stokTanimModel, token, true);
+            }
+            else
+            {
+                stokTanimModel = await HttpClient.PostGetServiceResponseAsync<StokTanimDTO, StokTanimDTO>(ConnectionManager.apiConnection+url, stokTanimModel, token, true);
+                StokId = stokTanimModel.Id;
+                NavigationManager.NavigateTo($"/stoks/edit/{StokId}", true);
+
+
+            }
+
+
+
+
+
+
+        }
+        catch (ApiException ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Api Hata", Detail = ex.Message, Duration = 4000 });
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Front Hata", Detail = ex.Message, Duration = 4000 });
+        }
+
+
+
+
+    }
+    void goBackproductList()
+    {
+        NavigationManager.NavigateTo("/stoklist");
+    }
+    private object OnTransformModel(object model)
+    {
+        // Confirm that the model is of the expected type
+        // Do transformations here
+        // return the transformed model
+        return model;
+    }
+    private async void DeleteBarkod(long Id)
+    {
+
+    }
+    private async void goUpdateBarkodPage(long Id)
+    {
+
+    }
+    private async void goCreateBarkodPage()
+    {
+        
+    }
+}
